@@ -6,7 +6,7 @@
     "init": {
       "factory": "./src/generators/init/init",
       "schema": "./src/generators/init/schema.json",
-      "description": "Initialize the @simondotm/nx-firebase plugin",
+      "description": "Initialize the @the-pack/fork-nx-firebase plugin",
       "hidden": true
     },
     "application": {

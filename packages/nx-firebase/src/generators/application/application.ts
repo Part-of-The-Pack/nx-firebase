@@ -13,7 +13,7 @@ import {
   readWorkspaceConfiguration,
   updateWorkspaceConfiguration,
   convertNxGenerator,
-  logger
+  logger,
 } from '@nrwl/devkit';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -30,11 +30,7 @@ interface NormalizedSchema extends Schema {
   parsedTags: string[];
 }
 
-function normalizeOptions(
-  host: Tree,
-  options: Schema
-): NormalizedSchema {
-
+function normalizeOptions(host: Tree, options: Schema): NormalizedSchema {
   const { appsDir, npmScope } = getWorkspaceLayout(host);
 
   const appDirectory = options.directory
@@ -50,10 +46,9 @@ function normalizeOptions(
     : [];
 
   // SM: we put the scoped project name into the firebase functions package.json
-  // it's not actually necessary to do this for firebase functions, 
+  // it's not actually necessary to do this for firebase functions,
   // but it gives the package.json more context when viewed
-  const importPath =
-    options.importPath || `@${npmScope}/${appProjectName}`;
+  const importPath = options.importPath || `@${npmScope}/${appProjectName}`;
 
   return {
     ...options,
@@ -63,15 +58,15 @@ function normalizeOptions(
     parsedTags,
     linter: options.linter ?? Linter.EsLint,
     unitTestRunner: options.unitTestRunner ?? 'jest',
-    importPath: importPath
+    importPath: importPath,
   };
 }
 
 /**
  * Add lint target to the firebase functions app
- * @param tree 
- * @param options 
- * @returns 
+ * @param tree
+ * @param options
+ * @returns
  */
 export async function addLintingToApplication(
   tree: Tree,
@@ -83,21 +78,17 @@ export async function addLintingToApplication(
     tsConfigPaths: [
       joinPathFragments(options.appProjectRoot, 'tsconfig.app.json'),
     ],
-    eslintFilePatterns: [
-      `${options.appProjectRoot}/**/*.ts`,
-    ],
+    eslintFilePatterns: [`${options.appProjectRoot}/**/*.ts`],
     skipFormat: true,
   });
 
   return lintTask;
 }
 
-
-
 /**
  * Create build target for NxFirebase apps
- * @param project 
- * @param options 
+ * @param project
+ * @param options
  * @returns target configuration
  */
 function getBuildConfig(
@@ -105,27 +96,27 @@ function getBuildConfig(
   options: NormalizedSchema
 ): TargetConfiguration {
   return {
-    executor: '@simondotm/nx-firebase:build',
+    executor: '@the-pack/fork-nx-firebase:build',
     outputs: ['{options.outputPath}'],
     options: {
       outputPath: joinPathFragments('dist', options.appProjectRoot),
       main: joinPathFragments(project.sourceRoot, 'index.ts'),
       tsConfig: joinPathFragments(options.appProjectRoot, 'tsconfig.app.json'),
       packageJson: joinPathFragments(options.appProjectRoot, 'package.json'),
-      assets: [joinPathFragments(options.appProjectRoot, '*.md'), joinPathFragments(options.appProjectRoot, '.runtimeconfig.json')],
-    }
+      assets: [
+        joinPathFragments(options.appProjectRoot, '*.md'),
+        joinPathFragments(options.appProjectRoot, '.runtimeconfig.json'),
+      ],
+    },
   };
 }
-
-
-
 
 /**
  * Create `emulate` target for NxFirebase apps
  * Uses run-commands executor to run the firebase emulator(s)
- * 
- * @param project 
- * @param options 
+ *
+ * @param project
+ * @param options
  * @returns target configuration
  */
 function getEmulateConfig(
@@ -135,8 +126,8 @@ function getEmulateConfig(
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-        command: `firebase emulators:start --config firebase.${options.appProjectName}.json`
-    }
+      command: `firebase emulators:start --config firebase.${options.appProjectName}.json`,
+    },
   };
 }
 
@@ -146,9 +137,9 @@ function getEmulateConfig(
  * 1. compile the functions app in watch mode
  * 2. select a firebase project
  * 3. run the firebase emulator(s)
- * 
- * @param project 
- * @param options 
+ *
+ * @param project
+ * @param options
  * @returns target configuration
  */
 function getServeConfig(
@@ -158,28 +149,27 @@ function getServeConfig(
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-        commands: [
-            {
-                command: `nx run ${options.appProjectName}:build --with-deps && nx run ${options.appProjectName}:build --watch`
-            },
-            {
-                command: `nx run ${options.appProjectName}:emulate`
-            }
-        ],
-        parallel: true
-    }
+      commands: [
+        {
+          command: `nx run ${options.appProjectName}:build --with-deps && nx run ${options.appProjectName}:build --watch`,
+        },
+        {
+          command: `nx run ${options.appProjectName}:emulate`,
+        },
+      ],
+      parallel: true,
+    },
   };
 }
-
 
 /**
  * Create deploy target for NxFirebase apps
  * Uses run-commands executor to run firebase CLI
  * Default Firebase Config has build+lint as predeploy
  * Additional command arguments are forwarded by default
- * 
- * @param project 
- * @param options 
+ *
+ * @param project
+ * @param options
  * @returns target configuration
  */
 function getDeployConfig(
@@ -189,18 +179,17 @@ function getDeployConfig(
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-        command: `firebase deploy --config firebase.${options.appProjectName}.json`
-    }
+      command: `firebase deploy --config firebase.${options.appProjectName}.json`,
+    },
   };
 }
-
 
 /**
  * Create functions `getconfig` target
  * Uses run-commands executor to run firebase CLI
- * 
- * @param project 
- * @param options 
+ *
+ * @param project
+ * @param options
  * @returns target configuration
  */
 function getGetConfigConfig(
@@ -210,21 +199,21 @@ function getGetConfigConfig(
   return {
     executor: '@nrwl/workspace:run-commands',
     options: {
-        command: `firebase functions:config:get --config firebase.${options.appProjectName}.json > ${options.appProjectRoot}/.runtimeconfig.json`
-    }
+      command: `firebase functions:config:get --config firebase.${options.appProjectName}.json > ${options.appProjectRoot}/.runtimeconfig.json`,
+    },
   };
 }
 
 /**
  * Add `.runtimeconfig.json` to workspace `.gitignore` file if not already added
- * @param host 
+ * @param host
  */
 export function addGitIgnoreEntry(host: Tree) {
   if (host.exists('.gitignore')) {
     let content = host.read('.gitignore', 'utf-8');
-    if (!content.includes(".runtimeconfig.json")) {
-        content = `${content}\n.runtimeconfig.json\n`;
-        host.write('.gitignore', content);
+    if (!content.includes('.runtimeconfig.json')) {
+      content = `${content}\n.runtimeconfig.json\n`;
+      host.write('.gitignore', content);
     }
   } else {
     logger.warn(`Couldn't find .gitignore file to update`);
@@ -233,8 +222,8 @@ export function addGitIgnoreEntry(host: Tree) {
 
 /**
  * Generate the new Firebase app project in the workspace
- * @param tree 
- * @param options 
+ * @param tree
+ * @param options
  */
 function addProject(tree: Tree, options: NormalizedSchema) {
   const project: ProjectConfiguration & NxJsonProjectConfiguration = {
@@ -247,9 +236,9 @@ function addProject(tree: Tree, options: NormalizedSchema) {
   project.targets.build = getBuildConfig(project, options);
   project.targets.deploy = getDeployConfig(project, options);
   project.targets.getconfig = getGetConfigConfig(project, options);
-  project.targets.emulate = getEmulateConfig(project, options)
+  project.targets.emulate = getEmulateConfig(project, options);
   project.targets.serve = getServeConfig(project, options);
-  
+
   addProjectConfiguration(tree, options.name, project);
 
   const workspace = readWorkspaceConfiguration(tree);
@@ -262,20 +251,22 @@ function addProject(tree: Tree, options: NormalizedSchema) {
   addGitIgnoreEntry(tree);
 }
 
-
 /**
  * Populate the NxFirebase app directory with the application files it needs:
  * - default database rules & indexes
  * - functions Typescript source directory & default entry script
  * - functions package.json
  * Also creates default `firebase.json` `.firebaserc` in the workspace root if they dont already exist
- * @param tree 
- * @param options 
+ * @param tree
+ * @param options
  */
 function addAppFiles(tree: Tree, options: NormalizedSchema) {
-  const relativeRootPath = offsetFromRoot(options.appProjectRoot)
-  const firebaseAppConfig = `firebase.${options.appProjectName}.json`
-  const offsetFirebaseAppConfig = joinPathFragments(relativeRootPath, firebaseAppConfig)
+  const relativeRootPath = offsetFromRoot(options.appProjectRoot);
+  const firebaseAppConfig = `firebase.${options.appProjectName}.json`;
+  const offsetFirebaseAppConfig = joinPathFragments(
+    relativeRootPath,
+    firebaseAppConfig
+  );
   const templateOptions = {
     ...options,
     ...names(options.name),
@@ -288,7 +279,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
   // we put the functions package & template typescript source files in here
   // it has no side effects if the user isn't using functions, and is easier to just assume.
   // user can delete if not wanted, and update their firebase config accordingly
-  // 
+  //
 
   // we also put any additional rules files in the application folder;
   // 1. so that they dont clutter up the root workspace
@@ -300,7 +291,7 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
     templateOptions
   );
 
-  // we put the template firebase.json config file in the root of the workspace, named (__name__) after the 
+  // we put the template firebase.json config file in the root of the workspace, named (__name__) after the
   // app project, so that it can be easily located with the cli command, and also enables nx workspaces
   // to contain multiple firebase projects
   // *.firebase.json files have to go in the root of the workspace, because firebase function deployment only allows
@@ -315,45 +306,44 @@ function addAppFiles(tree: Tree, options: NormalizedSchema) {
     templateOptions
   );
 
-  // generate these firebase files in the root workspace only if they dont already exist 
+  // generate these firebase files in the root workspace only if they dont already exist
   // ( since we dont want to overwrite any existing configs)
   // For a fresh workspace, the firebase CLI needs at least an empty firebase.json and an empty .firebaserc
   //  in order to use commands like 'firebase use --add'
   // firebase.json is an annoying artefact of this requirement, as it isn't actually used by our firebase apps
   //  which each have their own firebase.<appname>.json config
-  const firebaseDefaultConfig = path.join(tree.root, "firebase.json")
+  const firebaseDefaultConfig = path.join(tree.root, 'firebase.json');
   //console.log("firebaseDefaultConfig=" + firebaseDefaultConfig)
   if (!fs.existsSync(firebaseDefaultConfig)) {
     generateFiles(
-        tree,
-        path.join(__dirname, 'files_firebase'),
-        '',
-        templateOptions
+      tree,
+      path.join(__dirname, 'files_firebase'),
+      '',
+      templateOptions
     );
-  }else{
-      logger.log("✓ firebase.json already exists in this workspace")
+  } else {
+    logger.log('✓ firebase.json already exists in this workspace');
   }
-  const firebaseRc = path.join(tree.root, ".firebaserc")
+  const firebaseRc = path.join(tree.root, '.firebaserc');
   //console.log("firebaseRc=" + firebaseRc)
   if (!fs.existsSync(firebaseRc)) {
     generateFiles(
-        tree,
-        path.join(__dirname, 'files_firebaserc'),
-        '',
-        templateOptions
+      tree,
+      path.join(__dirname, 'files_firebaserc'),
+      '',
+      templateOptions
     );
-  }else{
-      logger.log("✓ .firebaserc already exists in this workspace")
+  } else {
+    logger.log('✓ .firebaserc already exists in this workspace');
   }
-
 }
 
 /**
  * NxFirebase application generator
  * Creates a new firebase application in the nx workspace
- * @param tree 
- * @param schema 
- * @returns 
+ * @param tree
+ * @param schema
+ * @returns
  */
 export async function applicationGenerator(tree: Tree, schema: Schema) {
   const options = normalizeOptions(tree, schema);
@@ -387,6 +377,5 @@ export async function applicationGenerator(tree: Tree, schema: Schema) {
   return runTasksInSerial(...tasks);
 }
 
-
-export default applicationGenerator
+export default applicationGenerator;
 export const applicationSchematic = convertNxGenerator(applicationGenerator);
