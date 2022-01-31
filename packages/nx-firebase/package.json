@@ -1,6 +1,6 @@
 {
   "name": "@the-pack/fork-nx-firebase",
-  "version": "0.3.3",
+  "version": "0.3.3-rc.1",
   "description": "A Firebase plugin for Nx monorepo workspaces.",
   "author": "Simon Morris",
   "license": "MIT",
