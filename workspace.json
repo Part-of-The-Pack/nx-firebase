@@ -21,7 +21,7 @@
           }
         },
         "build": {
-          "executor": "@nrwl/node:package",
+          "executor": "@nrwl/node:webpack",
           "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/packages/nx-firebase",
@@ -29,7 +29,6 @@
             "packageJson": "packages/nx-firebase/package.json",
             "main": "packages/nx-firebase/src/index.ts",
             "assets": [
-              "packages/nx-firebase/*.md",
               {
                 "input": "./packages/nx-firebase/src",
                 "glob": "**/*.!(ts)",

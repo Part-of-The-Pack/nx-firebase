@@ -1,12 +1,36 @@
 {
   "migrations": [
     {
-      "version": "12.1.2-beta.1",
+      "version": "13.3.0-beta.0",
+      "description": "@nrwl/workspace:tsc is now @nrwl/js:tsc",
       "cli": "nx",
-      "description": "Replace tsConfig with tsconfig for ts-jest in jest.config.js",
-      "factory": "./src/migrations/update-12-1-2/update-ts-jest",
+      "implementation": "./src/migrations/update-13-3-0/update-tsc-executor-location",
+      "package": "@nrwl/workspace",
+      "name": "13-3-0-tsc-location"
+    },
+    {
+      "version": "13.6.0-beta.0",
+      "description": "Remove old options that are no longer used",
+      "cli": "nx",
+      "implementation": "./src/migrations/update-13-6-0/remove-old-task-runner-options",
+      "package": "@nrwl/workspace",
+      "name": "13-6-0-remove-old-task-runner-options"
+    },
+    {
+      "version": "13.4.4-beta.0",
+      "cli": "nx",
+      "description": "Create a root babel config file if it doesn't exist and using babel-jest in jest.config.js and add @nrwl/web as needed",
+      "factory": "./src/migrations/update-13-4-4/add-missing-root-babel-config",
       "package": "@nrwl/jest",
-      "name": "update-ts-jest-6-5-5"
+      "name": "add-missing-root-babel-config"
+    },
+    {
+      "cli": "nx",
+      "version": "13.3.0-beta.0",
+      "description": "Update eslint-rules jest.config.js in order to support ESLint v8 exports mapping, remove category field",
+      "factory": "./src/migrations/update-13-3-0/eslint-8-updates",
+      "package": "@nrwl/linter",
+      "name": "eslint-8-updates"
     }
   ]
 }
