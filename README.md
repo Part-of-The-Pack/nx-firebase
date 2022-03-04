@@ -1,3 +1,10 @@
+# The Pack - How to deploy
+
+- `yarn nx build --project=firebase-functions-triggers``
+- Publish the `dist` folder: `dist/packages/nx-firebase``
+- Pack it: `npm pack`
+- Publish it to npm: `npm publish`
+
 # @the-pack/fork-nx-firebase
 
 ![npm](https://img.shields.io/npm/dw/@the-pack/fork-nx-firebase.svg)
