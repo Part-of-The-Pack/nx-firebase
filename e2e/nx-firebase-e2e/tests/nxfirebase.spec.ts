@@ -85,7 +85,7 @@ describe('nxfirebase e2e', () => {
 
       it('should build nxfirebase:app', async (done) => {
         const result = await runNxCommandAsync(`build ${appProject}`);
-        expect(result.stdout).toContain('Done compiling TypeScript files');
+        expect(result.stdout).toContain('Successfully ran target build for project');
         done();
       });
 

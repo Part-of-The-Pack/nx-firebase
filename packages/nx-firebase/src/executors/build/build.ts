@@ -18,9 +18,8 @@ import compileTypeScriptFiles from './node/package/utils/compile-typescript-file
 import updatePackageJson from './node/package/utils/update-package-json';
 import normalizeOptions from './node/package/utils/normalize-options';
 import addCliWrapper from './node/package/utils/cli';
-import { readJsonFile } from '@nrwl/workspace'
+import { readJsonFile, writeJsonFile } from '@nrwl/devkit'
 import { copy, removeSync } from 'fs-extra';
-import { writeJsonFile } from '@nrwl/workspace/src/utilities/fileutils'
 
 const ENABLE_DEBUG = false
 function debugLog(...args) {
@@ -49,7 +48,7 @@ export default async function runExecutor(options: FirebaseBuildExecutorSchema, 
   debugLog('options=', options)
 
   // get the project graph; returns an object containing all nodes in the workspace, files, and dependencies
-  const projGraph = await createProjectGraphAsync('4.0');
+  const projGraph = await createProjectGraphAsync();
   // nx firebase functions are essentially @nrwl/node:package libraries, but are added to the project
   // as applications as they are fundamentally the deployable "application" output of a build pipeline.
   // Due to this, we can import standard node libraries as dependencies from within the workspace
